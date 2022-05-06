@@ -1,0 +1,11 @@
+package main
+
+import (
+	"fmt"
+
+	baus "github.com/r4wm/baus/internal"
+)
+
+func main() {
+	fmt.Println(baus.Something())
+}
