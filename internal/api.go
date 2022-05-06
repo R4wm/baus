@@ -132,19 +132,20 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("searchString: ", searchString)
 
 	response := []Bible{}
-	searchResult := SearchResult{Query: searchString}
-	overallCount := make(map[string]int)
+	searchResult := SearchResult{
+		Query: searchString,
+		Stats: make(map[string]int),
+	}
+
 	re := regexp.MustCompile(searchString)
 	for _, v := range app.Bible {
 		if re.Match([]byte(v.Text)) {
 			response = append(response, v)
 			searchResult.Count++
-			overallCount[v.Book]++
-
+			searchResult.Stats[v.Book]++
 		}
 	}
 	b, err := json.Marshal(response)
-	searchResult.Stats = overallCount
 	c, err := json.Marshal(searchResult)
 	for _, v := range c {
 		b = append(b, v)
