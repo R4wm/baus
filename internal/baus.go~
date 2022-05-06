@@ -1,5 +1,0 @@
-package baus
-
-func Something() string {
-	return "FAKE"
-}
