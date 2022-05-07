@@ -29,7 +29,7 @@ func main() {
 	}
 
 	app.SetupRouter()
-	app.ConsumeJsonBibleFile("/tmp/kjv.json")
+	app.ConsumeJSONBibleFile("/tmp/kjv.json")
 	log.Fatal(http.ListenAndServe(":8080", app.Router))
 	fmt.Println(baus.Something())
 }
