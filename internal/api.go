@@ -97,7 +97,7 @@ func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 	verseRange := VerseRange(r)
 	fmt.Println("verserange: ", verseRange)
 
-	ordinalBookNum := getOrdinalBookNumber(book)
+	ordinalBookNum := Books[book]
 	fmt.Println("ordinalBookNum: ", ordinalBookNum)
 
 	chapter, err := strconv.Atoi(params["chapter"])
@@ -148,9 +148,8 @@ func (app *App) GetChapter(w http.ResponseWriter, r *http.Request) {
 	book := strings.ToUpper(params["book"])
 
 	// TODO skip to ordinal verse
-	ordinalBookNum := getOrdinalBookNumber(book)
+	ordinalBookNum := Books[book]
 	fmt.Println("ordinalBookNum: ", ordinalBookNum)
-
 	chapter, err := strconv.Atoi(params["chapter"])
 	if err != nil {
 		log.Fatalf("problems with chapter: %s\n", err)
@@ -167,6 +166,7 @@ func (app *App) GetChapter(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("failed to marshal response: %s\n", err)
 	}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("content-type", "application/json")
 	w.Write(b)
 }
@@ -175,7 +175,7 @@ func (app *App) GetChapter(w http.ResponseWriter, r *http.Request) {
 type SearchResult struct {
 	Count int            `json:"count"`
 	Query string         `json:"query"`
-	Stats map[string]int `json:"stats"`
+	Stats map[string]int `json:"bucket_stats"`
 }
 
 // Search get chapter

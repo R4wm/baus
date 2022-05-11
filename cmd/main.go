@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +16,8 @@ const (
 )
 
 func main() {
+	port := flag.String("port", "8000", "port number")
+	flag.Parse()
 	logFile, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: ", err)
@@ -30,6 +33,6 @@ func main() {
 
 	app.SetupRouter()
 	app.ConsumeJSONBibleFile("/tmp/kjv.json")
-	log.Fatal(http.ListenAndServe(":8080", app.Router))
+	log.Fatal(http.ListenAndServe(":"+*port, app.Router))
 	fmt.Println(baus.Something())
 }
