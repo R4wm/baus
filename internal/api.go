@@ -94,6 +94,9 @@ func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	book := strings.ToUpper(params["book"])
+	if book == "SONGOFSOLOMON" {
+		book = "SONG OF SOLOMON"
+	}
 	verseRange := VerseRange(r)
 	fmt.Println("verserange: ", verseRange)
 
@@ -119,6 +122,7 @@ func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 				if v.Chapter == chapter {
 					if v.Verse == verse {
 						response = append(response, v)
+						break
 					}
 				}
 			}
@@ -126,9 +130,13 @@ func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 	} else {
 		for _, v := range app.Bible {
 			if v.Book == book {
+				fmt.Println("in book")
 				if v.Chapter == chapter {
 					if v.Verse >= verseRange[0] && v.Verse <= verseRange[1] {
 						response = append(response, v)
+					}
+					if v.Verse == verseRange[1] {
+						break
 					}
 				}
 			}
@@ -138,6 +146,7 @@ func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("failed to marshal response: %s\n", err)
 	}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("content-type", "application/json")
 	w.Write(b)
 }
@@ -146,7 +155,9 @@ func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 func (app *App) GetChapter(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	book := strings.ToUpper(params["book"])
-
+	if book == "SONGOFSOLOMON" {
+		book = "SONG OF SOLOMON"
+	}
 	// TODO skip to ordinal verse
 	ordinalBookNum := Books[book]
 	fmt.Println("ordinalBookNum: ", ordinalBookNum)
@@ -220,6 +231,14 @@ func (app *App) Hi(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hi\n"))
 }
 
+//ListBooks lists books
+func (app *App) ListBooks(w http.ResponseWriter, r *http.Request) {
+	b, _ := json.Marshal(orderedBooks)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("content-type", "application/json")
+	w.Write(b)
+}
+
 // SetupRouter where the fun begins
 func (app *App) SetupRouter() {
 	subrouter := app.Router.PathPrefix("/v1").Subrouter()
@@ -227,5 +246,6 @@ func (app *App) SetupRouter() {
 	subrouter.HandleFunc("/{book}/{chapter}", app.GetChapter).Methods("GET")
 	subrouter.HandleFunc("/{book}/{chapter}/{verse}", app.GetVerse).Methods("GET") // can handle range ex: 1-5
 	subrouter.HandleFunc("/search", app.Search).Methods("GET")
+	subrouter.HandleFunc("/books", app.ListBooks).Methods("GET")
 
 }
