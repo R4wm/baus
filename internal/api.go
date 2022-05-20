@@ -201,7 +201,7 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("searchString: ", searchString)
 	response := []Bible{}
 	searchResult := SearchResult{Query: searchString}
-	overallCount := make(map[string]int)
+	// overallCount := make(map[string]int)
 	re := regexp.MustCompile(searchString)
 	for _, v := range app.Bible {
 		// remove italics indicator for search
@@ -210,20 +210,22 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 		if re.Match([]byte(noItal)) {
 			response = append(response, v)
 			searchResult.Count++
-			overallCount[v.Book]++
+			// overallCount[v.Book]++
 		}
 	}
 	b, err := json.Marshal(response)
-	searchResult.Stats = overallCount
-	c, err := json.Marshal(searchResult)
-	for _, v := range c {
-		b = append(b, v)
-	}
+	// searchResult.Stats = overallCount
+	// c, err := json.Marshal(searchResult)
+	// for _, v := range c {
+	// 	b = append(b, v)
+	// }
 	if err != nil {
 		fmt.Printf("failed to marshal response: %s\n", err)
 	}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("content-type", "application/json")
 	w.Write(b)
+
 }
 
 // Hi test
