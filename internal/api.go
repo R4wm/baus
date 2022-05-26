@@ -70,7 +70,7 @@ func VerseRange(r *http.Request) []int {
 	fmt.Println("u: ", u)
 	broken := strings.Split(u, "/")
 	base := broken[len(broken)-1]
-	fmt.Println(base)
+	log.Println(base)
 	re := regexp.MustCompile(`\d{1,3}-\d{1,3}`)
 	if re.MatchString(base) {
 		rangeList := strings.Split(base, "-")
@@ -92,13 +92,12 @@ func VerseRange(r *http.Request) []int {
 // GetVerse get verse(s)
 func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-
 	book := strings.ToUpper(params["book"])
 	if book == "SONGOFSOLOMON" {
 		book = "SONG OF SOLOMON"
 	}
 	verseRange := VerseRange(r)
-	fmt.Println("verserange: ", verseRange)
+	log.Println("verserange: ", verseRange)
 
 	ordinalBookNum := Books[book]
 	fmt.Println("ordinalBookNum: ", ordinalBookNum)
@@ -130,7 +129,6 @@ func (app *App) GetVerse(w http.ResponseWriter, r *http.Request) {
 	} else {
 		for _, v := range app.Bible {
 			if v.Book == book {
-				fmt.Println("in book")
 				if v.Chapter == chapter {
 					if v.Verse >= verseRange[0] && v.Verse <= verseRange[1] {
 						response = append(response, v)
@@ -160,7 +158,7 @@ func (app *App) GetChapter(w http.ResponseWriter, r *http.Request) {
 	}
 	// TODO skip to ordinal verse
 	ordinalBookNum := Books[book]
-	fmt.Println("ordinalBookNum: ", ordinalBookNum)
+	log.Println("ordinalBookNum: ", ordinalBookNum)
 	chapter, err := strconv.Atoi(params["chapter"])
 	if err != nil {
 		log.Fatalf("problems with chapter: %s\n", err)
@@ -191,7 +189,6 @@ type SearchResult struct {
 
 // Search get chapter
 func (app *App) Search(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("running search")
 	searchString := r.URL.Query().Get("q")
 	if searchString == "" {
 		w.WriteHeader(400)
