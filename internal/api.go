@@ -162,6 +162,9 @@ func (app *App) GetChapter(w http.ResponseWriter, r *http.Request) {
 	chapter, err := strconv.Atoi(params["chapter"])
 	if err != nil {
 		log.Fatalf("problems with chapter: %s\n", err)
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte(fmt.Sprintf("Chapters %s invalid: %s", chapter, err)))
+		return
 	}
 	response := []Bible{}
 	for _, v := range app.Bible {
