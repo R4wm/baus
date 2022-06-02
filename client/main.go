@@ -94,6 +94,40 @@ func (q *Query) GetChapter() {
 	}
 }
 
+// GetVerse get single verse or verse range
+func (q *Query) GetVerse() {
+	var requestURL string
+	switch q.VerseEnd {
+	case 0:
+		requestURL = fmt.Sprintf("%s/%s/%d/%d", url, q.Book, q.Chapter, q.VerseStart)
+	default:
+		requestURL = fmt.Sprintf("%s/%s/%d/%d-%d", url, q.Book, q.Chapter, q.VerseStart, q.VerseEnd)
+	}
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		log.Fatalf("Failed to get verse: ")
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Failed to read verse body")
+	}
+	result := []baus.Bible{}
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		log.Fatalf("Failed to json body")
+	}
+	if len(result) == 0 {
+		return
+	}
+	// print result
+	fmt.Printf("%s %d\n", strings.ToUpper(q.Book), q.Chapter)
+	for _, v := range result {
+		fmt.Printf("%d. %s\n\n", v.Verse, v.Text)
+	}
+}
+
 func main() {
 	m := Query{}
 	switch len(os.Args) {
@@ -115,10 +149,41 @@ func main() {
 			m.Chapter = chapter
 			m.GetChapter()
 		}
-
 	case 4:
 		fmt.Println("book chapter verse")
+		m.Book = os.Args[1]
+		chapterCandidate, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			fmt.Println("failed to parse chapter")
+			return
+		}
+		m.Chapter = chapterCandidate
+		m.VerseStart, err = strconv.Atoi(os.Args[3])
+		if err != nil {
+			fmt.Println("failed to parse start verse")
+			return
+		}
+		m.VerseEnd = 0
+		m.GetVerse()
 	case 5:
 		fmt.Println("book chapter verseStart verseEnd")
+		m.Book = os.Args[1]
+		chapterCandidate, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			fmt.Println("failed to parse chapter")
+			return
+		}
+		m.Chapter = chapterCandidate
+		m.VerseStart, err = strconv.Atoi(os.Args[3])
+		if err != nil {
+			fmt.Println("failed to parse start verse")
+			return
+		}
+		m.VerseEnd, err = strconv.Atoi(os.Args[4])
+		if err != nil {
+			fmt.Println("failed to parse end verse")
+			return
+		}
+		m.GetVerse()
 	}
 }
