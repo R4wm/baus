@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	url = "http://localhost:9664/v1"
-	//url = "https://mintz5.duckdns.org/bible"
+	//url = "http://localhost:9664/v1"
+	url         = "https://mintz5.duckdns.org/bible"
 	colorReset  = "\033[0m"
 	colorRed    = "\033[31m"
 	colorGreen  = "\033[32m"
@@ -166,7 +166,6 @@ func main() {
 		m.VerseEnd = 0
 		m.GetVerse()
 	case 5:
-		fmt.Println("book chapter verseStart verseEnd")
 		m.Book = os.Args[1]
 		chapterCandidate, err := strconv.Atoi(os.Args[2])
 		if err != nil {
