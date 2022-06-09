@@ -150,7 +150,6 @@ func main() {
 			m.GetChapter()
 		}
 	case 4:
-		fmt.Println("book chapter verse")
 		m.Book = os.Args[1]
 		chapterCandidate, err := strconv.Atoi(os.Args[2])
 		if err != nil {
