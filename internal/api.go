@@ -161,7 +161,7 @@ func (app *App) GetChapter(w http.ResponseWriter, r *http.Request) {
 	log.Println("ordinalBookNum: ", ordinalBookNum)
 	chapter, err := strconv.Atoi(params["chapter"])
 	if err != nil {
-		log.Fatalf("problems with chapter: %s\n", err)
+		log.Printf("problems with chapter: %s\n", err)
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte(fmt.Sprintf("Chapters %s invalid: %s", chapter, err)))
 		return
