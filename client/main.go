@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	//url = "http://localhost:9664/v1"
-	url         = "https://mintz5.duckdns.org/bible"
+	url = "http://localhost:9664/v1"
+	// url         = "https://mintz5.duckdns.org/bible"
 	colorReset  = "\033[0m"
 	colorRed    = "\033[31m"
 	colorGreen  = "\033[32m"
