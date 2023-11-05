@@ -202,6 +202,7 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 	response := []Bible{}
 	searchResult := SearchResult{Query: searchString}
 	overallCount := make(map[string]int)
+	searchString = "(?i)" + searchString
 	re := regexp.MustCompile(searchString)
 	for _, v := range app.Bible {
 		// remove italics indicator for search
