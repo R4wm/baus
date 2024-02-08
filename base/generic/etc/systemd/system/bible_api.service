@@ -1,0 +1,12 @@
+[Unit]
+Description=bible API Service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=r4wm
+ExecStart=/usr/bin/baus_server -config /etc/baus/config.json
+
+[Install]
+WantedBy=multi-user.target
