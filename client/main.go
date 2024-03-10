@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,6 +12,77 @@ import (
 	"strings"
 
 	baus "github.com/r4wm/baus/internal"
+)
+
+var (
+	BookChapterLimit = map[string]int{
+		"GENESIS":         50,
+		"EXODUS":          40,
+		"LEVITICUS":       27,
+		"NUMBERS":         36,
+		"DEUTERONOMY":     34,
+		"JOSHUA":          24,
+		"JUDGES":          21,
+		"RUTH":            4,
+		"1SAMUEL":         31,
+		"2SAMUEL":         24,
+		"1KINGS":          22,
+		"2KINGS":          25,
+		"1CHRONICLES":     29,
+		"2CHRONICLES":     36,
+		"EZRA":            10,
+		"NEHEMIAH":        13,
+		"ESTHER":          10,
+		"JOB":             42,
+		"PSALMS":          150,
+		"PROVERBS":        31,
+		"ECCLESIASTES":    12,
+		"SONG OF SOLOMON": 8,
+		"ISAIAH":          66,
+		"JEREMIAH":        52,
+		"LAMENTATIONS":    5,
+		"EZEKIEL":         48,
+		"DANIEL":          12,
+		"HOSEA":           14,
+		"JOEL":            3,
+		"AMOS":            9,
+		"OBADIAH":         1,
+		"JONAH":           4,
+		"MICAH":           7,
+		"NAHUM":           3,
+		"HABAKKUK":        3,
+		"ZEPHANIAH":       3,
+		"HAGGAI":          2,
+		"ZECHARIAH":       14,
+		"MALACHI":         4,
+		"MATTHEW":         28,
+		"MARK":            16,
+		"LUKE":            24,
+		"JOHN":            21,
+		"ACTS":            28,
+		"ROMANS":          16,
+		"1CORINTHIANS":    16,
+		"2CORINTHIANS":    13,
+		"GALATIANS":       6,
+		"EPHESIANS":       6,
+		"PHILIPPIANS":     4,
+		"COLOSSIANS":      4,
+		"1THESSALONIANS":  5,
+		"2THESSALONIANS":  3,
+		"1TIMOTHY":        6,
+		"2TIMOTHY":        4,
+		"TITUS":           3,
+		"PHILEMON":        1,
+		"HEBREWS":         13,
+		"JAMES":           5,
+		"1PETER":          5,
+		"2PETER":          3,
+		"1JOHN":           5,
+		"2JOHN":           1,
+		"3JOHN":           1,
+		"JUDE":            1,
+		"REVELATION":      22,
+	}
 )
 
 const (
@@ -33,6 +105,42 @@ type Query struct {
 	VerseStart  int
 	VerseEnd    int
 	SearchQuery string
+}
+
+// lazyBook only adds book to string if pattern is met
+func lazyBook(shortName string) (book string, err error) {
+	// TODO: write simple test
+	shortName = strings.ToUpper(shortName)
+	var possibleBooks []string
+
+	// iterate the BookList and add if pattern meets
+	for bookCandidate, _ := range BookChapterLimit {
+		// fmt.Println("this is candidate: ", bookCandidate)
+		// TODO CHange to regex /
+		if strings.HasPrefix(bookCandidate, shortName) {
+			// fmt.Println("Found : ", bookCandidate)
+			possibleBooks = append(possibleBooks, bookCandidate)
+		}
+	}
+
+	// Handle non existing book name
+	if len(possibleBooks) == 0 {
+		errMsg := fmt.Sprintf("no books with string combination of: %s\n", shortName)
+		err = errors.New(errMsg)
+		return "", err
+	}
+
+	fmt.Println("possibleBooks: ", possibleBooks)
+	if len(possibleBooks) > 1 {
+		errMsg := fmt.Sprintf("more than one possible choice: %s", possibleBooks)
+		err = errors.New(errMsg)
+		return "", err
+	} else {
+		book = possibleBooks[0]
+		return book, nil
+	}
+
+	return book, err
 }
 
 func (q *Query) Search() {
@@ -141,7 +249,12 @@ func main() {
 			m.SearchQuery = os.Args[2]
 			m.Search()
 		} else {
-			m.Book = os.Args[1]
+			var err error
+			m.Book, err = lazyBook(os.Args[1])
+			if err != nil {
+				fmt.Printf("failed to use lazyBook: %s", err)
+			}
+			// m.Book = os.Args[1]
 			chapter, err := strconv.Atoi(os.Args[2])
 			if err != nil {
 				log.Fatal("Cant parse chapter %s", os.Args[2])
