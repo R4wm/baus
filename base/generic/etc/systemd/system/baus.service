@@ -1,0 +1,12 @@
+[Unit]
+Description=baus bible search application
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=rmintz
+ExecStart=/usr/bin/baus_server -config /etc/baus/config.json
+
+[Install]
+WantedBy=multi-user.target
