@@ -1,11 +1,11 @@
 [Unit]
-Description=bible API Service
+Description=baus bible search application
 
 [Service]
 Type=simple
 Restart=always
 RestartSec=1
-User=r4wm
+User=rmintz
 ExecStart=/usr/bin/baus_server -config /etc/baus/config.json
 
 [Install]
