@@ -16,12 +16,20 @@ const (
 	logFile = "/tmp/baus.log"
 )
 
+var (
+	useColor = false
+	RED      = "\033[0;31m"
+	NC       = "\033[0m" // No Color"
+
+)
+
 // Config the file with info
 type Config struct {
 	Host    string `json:"host"`
 	Port    string `json:"port"`
 	KJVPath string `json:"kjvPath"`
 	LogPath string `json:"logPath"`
+	Color   bool   `json:"color"`
 }
 
 func main() {
@@ -38,6 +46,7 @@ func main() {
 		log.Fatalf("could not read config: %s\n", *config)
 	}
 	configData := &Config{}
+	log.Println(fmt.Sprintf("configData: %#v\n", configData))
 	err = json.Unmarshal(dat, &configData)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal config from: %s\n%s\n", *config, err)
@@ -57,11 +66,6 @@ func main() {
 		Logger: logger,
 	}
 	app.SetupRouter()
-	log.Println("host: ", configData.Host)
-	log.Println("port: ", configData.Port)
-	log.Println("KJVPath: ", configData.KJVPath)
-	log.Println("logPath: ", configData.LogPath)
 	app.ConsumeJSONBibleFile(configData.KJVPath)
 	log.Fatal(http.ListenAndServe(listenAddr, app.Router))
-	fmt.Println(baus.Something())
 }

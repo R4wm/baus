@@ -2,5 +2,6 @@
     "host": "localhost",
     "port": "9664",
     "kjvPath": "/tmp/kjv.json",
-    "logPath": "/tmp/baus.log"
+    "logPath": "/tmp/baus.log",
+    "color": true
 }
