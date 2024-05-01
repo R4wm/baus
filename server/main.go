@@ -46,11 +46,13 @@ func main() {
 		log.Fatalf("could not read config: %s\n", *config)
 	}
 	configData := &Config{}
-	log.Println(fmt.Sprintf("configData: %#v\n", configData))
 	err = json.Unmarshal(dat, &configData)
 	if err != nil {
 		log.Fatalf("Failed to unmarshal config from: %s\n%s\n", *config, err)
 	}
+
+	log.Println(fmt.Sprintf("configData: %#v\n", configData))
+
 	listenAddr := configData.Host + ":" + configData.Port
 	logFile, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {

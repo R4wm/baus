@@ -1,6 +1,7 @@
 package baus
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,6 +14,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var (
+	RED = "\033[0;31m"
+	NC  = "\033[0m" // No Color"
+)
+
 // Bible
 type Bible struct {
 	Testament    string `json:"canonical_testament"` // canonical testament
@@ -22,6 +28,32 @@ type Bible struct {
 	Text         string `json:"text"`                // actual verse
 	OrdinalVerse int    `json:"ordinal_verse"`       // sequential verse number
 	OrdinalBook  int    `json:"ordinal_book"`        // sequential book number
+}
+
+func (b *Bible) HighlightText(searchStr string) {
+	// find the word in the text and
+	//  put the color before it and the NC after it
+	fmt.Println(">>> YOURE IN HIGHLIGHT")
+	i := strings.Index(b.Text, searchStr)
+
+	fmt.Printf(">>> index of %s is %d\n", searchStr, i)
+	// b.Text = b.Text[:i] + RED + b.Text[i:] + NC
+	var buffer bytes.Buffer
+	buffer.WriteString(b.Text[:i] + RED)
+	fmt.Println(">>> check where  am: ", b.Text[buffer.Len()+2:])
+	// buffer.WriteString(NC)
+	fmt.Println("this is bufferString after NC: ", buffer.String())
+	buffer.WriteString(b.Text[buffer.Len():])
+	// buffer.WriteString(b.Text[i+len(RED):] + NC)
+	// buffer.WriteString(b.Text[buffer.Len():])
+	// b.Text = b.Text[:i] + RED + b.Text[i:] + NC
+	// fmt.Println("check where i am: ", b.Text)
+	b.Text = buffer.String()
+	// b.Text = b.Text[:i+2] + NC + b.Text[i+2:] + NC
+	// afterWordIndex := i + len(searchStr)
+	// b.Text = b.Text[:afterWordIndex] + NC + b.Text[i:]
+	fmt.Println(">>> this is new string: ", b.Text)
+
 }
 
 // App todo
@@ -198,9 +230,10 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("empty search parameter: %s\n", searchString)))
 		return
 	}
-	fmt.Println("searchString: ", searchString)
+	fmt.Printf("searchString: %#v\n", searchString)
 	response := []Bible{}
-	searchResult := SearchResult{Query: searchString}
+	searchIt := SearchResult{Query: searchString}
+
 	overallCount := make(map[string]int)
 	re := regexp.MustCompile(searchString)
 	for _, v := range app.Bible {
@@ -208,14 +241,18 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 		noItal := strings.Replace(v.Text, "[", "", -1)
 		noItal = strings.Replace(noItal, "]", "", -1)
 		if re.Match([]byte(noItal)) {
+			// add highlight here
+			fmt.Println("this is v: ", v.Text)
+			v.HighlightText(searchString)
+			fmt.Println("this is v after highlight: ", v.Text)
 			response = append(response, v)
-			searchResult.Count++
+			searchIt.Count++
 			overallCount[v.Book]++
 		}
 	}
 	b, err := json.Marshal(response)
-	// searchResult.Stats = overallCount
-	// c, err := json.Marshal(searchResult)
+	// searchIt.Stats = overallCount
+	// c, err := json.Marshal(searchIt)
 	// for _, v := range c {
 	// 	b = append(b, v)
 	// }
@@ -226,11 +263,6 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	w.Write(b)
 
-}
-
-// Hi test
-func (app *App) Hi(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hi\n"))
 }
 
 // ListBooks lists books
@@ -244,7 +276,6 @@ func (app *App) ListBooks(w http.ResponseWriter, r *http.Request) {
 // SetupRouter where the fun begins
 func (app *App) SetupRouter() {
 	subrouter := app.Router.PathPrefix("/v1").Subrouter()
-	subrouter.HandleFunc("/hi", app.Hi).Methods("GET")
 	subrouter.HandleFunc("/{book}/{chapter}", app.GetChapter).Methods("GET")
 	subrouter.HandleFunc("/{book}/{chapter}/{verse}", app.GetVerse).Methods("GET") // can handle range ex: 1-5
 	subrouter.HandleFunc("/search", app.Search).Methods("GET")
