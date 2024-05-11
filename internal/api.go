@@ -33,27 +33,17 @@ type Bible struct {
 func (b *Bible) HighlightText(searchStr string) {
 	// find the word in the text and
 	//  put the color before it and the NC after it
-	fmt.Println(">>> YOURE IN HIGHLIGHT")
+	// x == beginning
+	// y == searchedString
+	// z == ending of verse
 	i := strings.Index(b.Text, searchStr)
+	x := b.Text[0:i] // beginning part
+	y := b.Text[i : i+len(searchStr)]
+	z := b.Text[i+len(searchStr):]
 
-	fmt.Printf(">>> index of %s is %d\n", searchStr, i)
-	// b.Text = b.Text[:i] + RED + b.Text[i:] + NC
 	var buffer bytes.Buffer
-	buffer.WriteString(b.Text[:i] + RED)
-	fmt.Println(">>> check where  am: ", b.Text[buffer.Len()+2:])
-	// buffer.WriteString(NC)
-	fmt.Println("this is bufferString after NC: ", buffer.String())
-	buffer.WriteString(b.Text[buffer.Len():])
-	// buffer.WriteString(b.Text[i+len(RED):] + NC)
-	// buffer.WriteString(b.Text[buffer.Len():])
-	// b.Text = b.Text[:i] + RED + b.Text[i:] + NC
-	// fmt.Println("check where i am: ", b.Text)
+	buffer.WriteString(x + RED + y + NC + z)
 	b.Text = buffer.String()
-	// b.Text = b.Text[:i+2] + NC + b.Text[i+2:] + NC
-	// afterWordIndex := i + len(searchStr)
-	// b.Text = b.Text[:afterWordIndex] + NC + b.Text[i:]
-	fmt.Println(">>> this is new string: ", b.Text)
-
 }
 
 // App todo
@@ -230,7 +220,6 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("empty search parameter: %s\n", searchString)))
 		return
 	}
-	fmt.Printf("searchString: %#v\n", searchString)
 	response := []Bible{}
 	searchIt := SearchResult{Query: searchString}
 
@@ -242,9 +231,7 @@ func (app *App) Search(w http.ResponseWriter, r *http.Request) {
 		noItal = strings.Replace(noItal, "]", "", -1)
 		if re.Match([]byte(noItal)) {
 			// add highlight here
-			fmt.Println("this is v: ", v.Text)
 			v.HighlightText(searchString)
-			fmt.Println("this is v after highlight: ", v.Text)
 			response = append(response, v)
 			searchIt.Count++
 			overallCount[v.Book]++
